@@ -14,7 +14,7 @@
         android:layout_height="0dp"
         android:layout_weight="9"
         android:textColor="@android:color/white"
-        android:textSize="65sp"
+        android:textSize="50sp"
         android:layout_margin="15dp"
         android:maxLength="11"
         android:fontFamily="@font/san_francisco_light"

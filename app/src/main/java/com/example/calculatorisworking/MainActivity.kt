@@ -3,6 +3,8 @@ package com.example.calculatorisworking
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.util.Log.*
 import android.widget.Button
 import android.widget.TextView
 import kotlin.math.roundToInt
@@ -15,27 +17,17 @@ import java.lang.Exception
 object FunResult {
     var number1: Double? = null
     var number2: Double? = null
-    var char1: String? = null
+    var answer: Double = 0.0
 }
 object FunAction {
     var actionflag: Boolean = false
-    var btn_name: String = ""
+    var btn_name: String = "btn_quality"
+    var prev_btn_name : String = ""
+    var input_text : Boolean = false
+    var kostilb : Boolean = false
 }
 
 class MainActivity() : AppCompatActivity() {
-//    val result_text: TextView = findViewById(R.id.result_text)
-
-//    fun exressionBuilder() : String{
-//        try {
-//            var beatyNumber1 = number1.toInt()
-//            var beatyNumber2 = number2?.toInt()
-//            return "$beatyNumber1" + if (char1 == null) "" else {
-//                char1.toString() + if (beatyNumber2 == null) "" else beatyNumber2.toString()
-//            }
-//        } catch (e: Exception){
-//            return "xui"
-//        }
-//    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -76,51 +68,88 @@ class MainActivity() : AppCompatActivity() {
         btn_multiply.setOnClickListener { action("btn_multiply") }
         delText()
     }
-    fun resultView() {
-        val result_text: TextView = findViewById(R.id.result_text)
-        var answer : Double = 0.0
-        FunResult.number2 = result_text.text.toString().toDouble()
-        when (FunAction.btn_name){
-            "btn_plus" -> {
-                answer = FunResult.number1?.plus(FunResult.number2!!)!!
-            }
-            "btn_minus" -> {
-                answer = FunResult.number1?.minus(FunResult.number2!!)!!
-            }
-            "btn_division" -> {
-                answer = FunResult.number1?.div(FunResult.number2!!)!!
-            }
-            "btn_multiply" -> {
-                answer = FunResult.number1?.times(FunResult.number2!!)!!
-            }
-        }
-        try {
-            val round_answer = (answer * 10000.0).roundToInt() / 10000.0 // ВЫДАЕТ ЧИСЛО В ФОРМАТЕ E
-            result_text.text = round_answer.toString()
-        } catch (e: Exception) {result_text.text = "Ошибка."}
-
-    }
     fun setText(str: String) {
         val result_text: TextView = findViewById(R.id.result_text)
-        if (result_text.text.toString() == "0" && FunAction.actionflag == false) result_text.text = str
-        else if (result_text.text.toString() != "0" && FunAction.actionflag == false) result_text.append(str)
-
-        if (FunAction.actionflag == true) {
-            if (FunResult.number1 == null) {
-                FunResult.number1 = result_text.text.toString().toDouble()
-                result_text.text = str
-            }
-            else {
-                if (result_text.text.toString() == "0") result_text.text = str
-                else result_text.append(str)
-            }
+        if (!FunAction.input_text && !FunAction.actionflag) {
+            result_text.text = str
+            FunAction.input_text = true
         }
+        else if (FunAction.input_text && !FunAction.actionflag) result_text.append(str)
+        else if (!FunAction.input_text && FunAction.actionflag) {
+            result_text.text = str
+            FunAction.input_text = true
+            FunAction.kostilb = false
+        }
+        else result_text.append(str)
 
         if (result_text.text.toString() != "0") {
             val btn_C : Button = findViewById(R.id.btn_C)
             btn_C.text = "C"
         }
     }
+    fun resultView() {
+        i("","""
+            |FunResult.number1 = ${FunResult.number1}
+            |FunResult.number2 = ${FunResult.number2}
+            |FunAction.actionflag = ${FunAction.actionflag}
+            |FunAction.btn_name = ${FunAction.btn_name}
+            |FunAction.prev_btn_name = ${FunAction.prev_btn_name}
+        """.trimMargin())
+        if (FunResult.number1 != null && (FunAction.btn_name != "btn_quality" ||
+                    FunAction.prev_btn_name != "btn_quality")) {
+            var btn: Button = findViewById(R.id.btn_equlity)
+            val result_text: TextView = findViewById(R.id.result_text)
+            if (FunAction.prev_btn_name != "btn_quality" && FunAction.btn_name == "btn_quality" && FunAction.kostilb) {
+                FunResult.number2 = FunResult.number1
+                FunAction.kostilb = false
+            }
+            else
+                FunResult.number2 = result_text.text.toString().toDouble()
+            when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
+                "btn_plus" -> {
+                    FunResult.answer = FunResult.number1?.plus(FunResult.number2!!)!!
+                }
+
+                "btn_minus" -> {
+                    FunResult.answer = FunResult.number1?.minus(FunResult.number2!!)!!
+                }
+
+                "btn_division" -> {
+                    FunResult.answer = FunResult.number1?.div(FunResult.number2!!)!!
+                }
+
+                "btn_multiply" -> {
+                    FunResult.answer = FunResult.number1?.times(FunResult.number2!!)!!
+                }
+            }
+            result_text.text = FunResult.answer.toString()
+            when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
+                "btn_plus" -> {
+                    btn = findViewById(R.id.btn_plus)
+                }
+
+                "btn_minus" -> {
+                    btn = findViewById(R.id.btn_minus)
+                }
+
+                "btn_division" -> {
+                    btn = findViewById(R.id.btn_division)
+                }
+
+                "btn_multiply" -> {
+                    btn = findViewById(R.id.btn_multiply)
+                }
+            }
+            btn.setBackgroundColor(Color.parseColor("#ffaf25"))
+            btn.setTextColor(Color.parseColor("#ffffff"))
+            FunAction.actionflag = false
+            FunAction.input_text = false
+            FunResult.number1 = FunResult.answer
+            FunAction.prev_btn_name = FunAction.btn_name
+            FunAction.btn_name = "btn_equlity"
+        }
+    }
+
     fun delText() {
         val result_text: TextView = findViewById(R.id.result_text)
         var btn : Button = findViewById(R.id.btn_equlity)
@@ -146,15 +175,17 @@ class MainActivity() : AppCompatActivity() {
             }
             btn.setBackgroundColor(Color.parseColor("#ffaf25"))
             btn.setTextColor(Color.parseColor("#ffffff"))
-            FunAction.btn_name = "blabla"
+            FunAction.btn_name = "btn_equlity"
             FunAction.actionflag = false
+            FunAction.input_text = false
             FunResult.number1 = null
+            FunResult.number2 = null
+            FunAction.kostilb = true
         }
     }
     fun action(btn_name : String) {
         val result_text: TextView = findViewById(R.id.result_text)
         var btn : Button = findViewById(R.id.btn_equlity)
-        FunResult.char1 = btn_name
         if (FunAction.btn_name != btn_name){
             when(FunAction.btn_name){
                 "btn_plus" -> {btn = findViewById(R.id.btn_plus)}
@@ -173,10 +204,9 @@ class MainActivity() : AppCompatActivity() {
             btn.setBackgroundColor(Color.parseColor("#ffffff"))
             btn.setTextColor(Color.parseColor("#ffaf25"))
             FunAction.btn_name = btn_name
+            FunResult.number1 = result_text.text.toString().toDouble()
+            FunAction.input_text = false
             FunAction.actionflag = true
         }
     }
-    //    override fun onResume() {
-    //        super.onResume()
-    //    }
 }
