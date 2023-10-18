@@ -16,7 +16,6 @@
         android:textColor="@android:color/white"
         android:textSize="50sp"
         android:layout_margin="15dp"
-        android:maxLength="11"
         android:fontFamily="@font/san_francisco_light"
         android:gravity="end|bottom">
     </TextView>

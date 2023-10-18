@@ -18,13 +18,13 @@ object FunResult {
     var number1: Double? = null
     var number2: Double? = null
     var answer: Double = 0.0
+    var saved_value : Double? = null
 }
 object FunAction {
     var actionflag: Boolean = false
     var btn_name: String = "btn_quality"
     var prev_btn_name : String = ""
     var input_text : Boolean = false
-    var kostilb : Boolean = false
 }
 
 class MainActivity() : AppCompatActivity() {
@@ -56,8 +56,11 @@ class MainActivity() : AppCompatActivity() {
         val btn_C : MaterialButton = findViewById(R.id.btn_C)
         btn_C.setOnClickListener {delText()}
         val btn_percent : Button = findViewById(R.id.btn_percent)
+        btn_percent.setOnClickListener { setPercent() }
         val btn_plus_minus : Button = findViewById(R.id.btn_plus_minus)
+        btn_plus_minus.setOnClickListener { setChar() }
         val btn_point : Button = findViewById(R.id.btn_point)
+        btn_point.setOnClickListener { setPoint() }
         val btn_plus : Button = findViewById(R.id.btn_plus)
         btn_plus.setOnClickListener { action("btn_plus") }
         val btn_minus : Button = findViewById(R.id.btn_minus)
@@ -70,6 +73,7 @@ class MainActivity() : AppCompatActivity() {
     }
     fun setText(str: String) {
         val result_text: TextView = findViewById(R.id.result_text)
+        if (result_text.text.toString() == "0" && str == "0") return Unit
         if (!FunAction.input_text && !FunAction.actionflag) {
             result_text.text = str
             FunAction.input_text = true
@@ -78,7 +82,6 @@ class MainActivity() : AppCompatActivity() {
         else if (!FunAction.input_text && FunAction.actionflag) {
             result_text.text = str
             FunAction.input_text = true
-            FunAction.kostilb = false
         }
         else result_text.append(str)
 
@@ -87,42 +90,84 @@ class MainActivity() : AppCompatActivity() {
             btn_C.text = "C"
         }
     }
+
+    fun setPercent(){
+        val result_text: TextView = findViewById(R.id.result_text)
+        var result_division_hundred : Double = result_text.text.toString().toDouble()
+        result_division_hundred /= 100
+        result_text.text = result_division_hundred.toString()
+    }
+
+    fun setChar(){
+        val result_text: TextView = findViewById(R.id.result_text)
+        var result_text_setChar = ""
+        if (result_text.text.toString().indexOf("-") == -1){
+            result_text_setChar = "-${result_text.text}"
+            result_text.text = result_text_setChar
+        }
+        else{
+            result_text_setChar = result_text.text.toString().replace("-","")
+            result_text.text = result_text_setChar
+        }
+    }
+
+    fun setPoint(){
+        val result_text: TextView = findViewById(R.id.result_text)
+        var result_text_setPoint = ""
+        if (result_text.text.toString().indexOf(".") == -1) {
+            result_text_setPoint = "${result_text.text}."
+            result_text.text = result_text_setPoint
+        }
+    }
     fun resultView() {
-        i("","""
-            |FunResult.number1 = ${FunResult.number1}
-            |FunResult.number2 = ${FunResult.number2}
-            |FunAction.actionflag = ${FunAction.actionflag}
-            |FunAction.btn_name = ${FunAction.btn_name}
-            |FunAction.prev_btn_name = ${FunAction.prev_btn_name}
-        """.trimMargin())
         if (FunResult.number1 != null && (FunAction.btn_name != "btn_quality" ||
                     FunAction.prev_btn_name != "btn_quality")) {
             var btn: Button = findViewById(R.id.btn_equlity)
             val result_text: TextView = findViewById(R.id.result_text)
-            if (FunAction.prev_btn_name != "btn_quality" && FunAction.btn_name == "btn_quality" && FunAction.kostilb) {
-                FunResult.number2 = FunResult.number1
-                FunAction.kostilb = false
+            if (FunResult.saved_value == null) {
+                FunResult.saved_value = FunResult.number1
             }
-            else
+            else if (FunAction.actionflag)
                 FunResult.number2 = result_text.text.toString().toDouble()
-            when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
-                "btn_plus" -> {
-                    FunResult.answer = FunResult.number1?.plus(FunResult.number2!!)!!
-                }
+            if (FunResult.number2 != null){
+                when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
+                    "btn_plus" -> {
+                        FunResult.answer = FunResult.number1?.plus(FunResult.number2!!)!!
+                    }
 
-                "btn_minus" -> {
-                    FunResult.answer = FunResult.number1?.minus(FunResult.number2!!)!!
-                }
+                    "btn_minus" -> {
+                        FunResult.answer = FunResult.number1?.minus(FunResult.number2!!)!!
+                    }
 
-                "btn_division" -> {
-                    FunResult.answer = FunResult.number1?.div(FunResult.number2!!)!!
-                }
+                    "btn_division" -> {
+                        FunResult.answer = FunResult.number1?.div(FunResult.number2!!)!!
+                    }
 
-                "btn_multiply" -> {
-                    FunResult.answer = FunResult.number1?.times(FunResult.number2!!)!!
+                    "btn_multiply" -> {
+                        FunResult.answer = FunResult.number1?.times(FunResult.number2!!)!!
+                    }
                 }
             }
-            result_text.text = FunResult.answer.toString()
+            else {
+                when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
+                    "btn_plus" -> {
+                        FunResult.answer = FunResult.number1?.plus(FunResult.saved_value!!)!!
+                    }
+
+                    "btn_minus" -> {
+                        FunResult.answer = FunResult.number1?.minus(FunResult.saved_value!!)!!
+                    }
+
+                    "btn_division" -> {
+                        FunResult.answer = FunResult.number1?.div(FunResult.saved_value!!)!!
+                    }
+
+                    "btn_multiply" -> {
+                        FunResult.answer = FunResult.number1?.times(FunResult.saved_value!!)!!
+                    }
+                }
+            }
+            result_text.text = FunResult.answer.toLong().toString()
             when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
                 "btn_plus" -> {
                     btn = findViewById(R.id.btn_plus)
@@ -140,13 +185,23 @@ class MainActivity() : AppCompatActivity() {
                     btn = findViewById(R.id.btn_multiply)
                 }
             }
+            i("","""
+            |FunResult.number1 = ${FunResult.number1}
+            |FunResult.number2 = ${FunResult.number2}
+            |FunAction.actionflag = ${FunAction.actionflag}
+            |FunAction.btn_name = ${FunAction.btn_name}
+            |FunAction.prev_btn_name = ${FunAction.prev_btn_name}
+            |FunResult.answer = ${FunResult.answer}
+            |FunResult.saved_value = ${FunResult.saved_value}
+        """.trimMargin())
             btn.setBackgroundColor(Color.parseColor("#ffaf25"))
             btn.setTextColor(Color.parseColor("#ffffff"))
             FunAction.actionflag = false
             FunAction.input_text = false
+            FunResult.number2 = null
             FunResult.number1 = FunResult.answer
-            FunAction.prev_btn_name = FunAction.btn_name
-            FunAction.btn_name = "btn_equlity"
+            if (FunAction.btn_name != "btn_quality") FunAction.prev_btn_name = FunAction.btn_name
+            FunAction.btn_name = "btn_quality"
         }
     }
 
@@ -180,7 +235,7 @@ class MainActivity() : AppCompatActivity() {
             FunAction.input_text = false
             FunResult.number1 = null
             FunResult.number2 = null
-            FunAction.kostilb = true
+            FunResult.saved_value = null
         }
     }
     fun action(btn_name : String) {
