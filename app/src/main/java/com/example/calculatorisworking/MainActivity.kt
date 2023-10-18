@@ -124,7 +124,7 @@ class MainActivity() : AppCompatActivity() {
                     FunAction.prev_btn_name != "btn_quality")) {
             var btn: Button = findViewById(R.id.btn_equlity)
             val result_text: TextView = findViewById(R.id.result_text)
-            if (FunResult.saved_value == null) {
+            if (FunResult.saved_value == null && FunResult.number2 == null) {
                 FunResult.saved_value = FunResult.number1
             }
             else if (FunAction.actionflag)
@@ -167,7 +167,8 @@ class MainActivity() : AppCompatActivity() {
                     }
                 }
             }
-            result_text.text = FunResult.answer.toLong().toString()
+            FunResult.answer = (FunResult.answer * 10000.0).toLong() / 10000.0
+            result_text.text = FunResult.answer.toString()
             when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
                 "btn_plus" -> {
                     btn = findViewById(R.id.btn_plus)
