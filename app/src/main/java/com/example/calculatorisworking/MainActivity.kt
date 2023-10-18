@@ -26,7 +26,7 @@ object FunAction {
     var prev_btn_name : String = ""
     var input_text : Boolean = false
 }
-
+// commit
 class MainActivity() : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
