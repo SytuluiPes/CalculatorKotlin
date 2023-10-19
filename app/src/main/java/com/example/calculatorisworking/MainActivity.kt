@@ -27,8 +27,8 @@ enum class Buttons{
 
 object FunAction {
     var actionflag: Boolean = false
-    var btn_name: String = "btn_quality"
-    var prev_btn_name : String = ""
+    var btn_name: Buttons = Buttons.Equility
+    var prev_btn_name : Buttons = btn_name
     var input_text : Boolean = false
 }
 class MainActivity() : AppCompatActivity() {
@@ -170,33 +170,36 @@ class MainActivity() : AppCompatActivity() {
     }
     fun resultView() {
         test("resultView - START")
-        if (FunResult.number1 != null && (FunAction.btn_name != "btn_quality" ||
-                    FunAction.prev_btn_name != "btn_quality")) {
+        if (FunResult.number1 != null && (FunAction.btn_name != Buttons.Equility ||
+                    FunAction.prev_btn_name != Buttons.Equility)) {
             var btn: Button = findViewById(R.id.btn_equlity)
             val result_text: TextView = findViewById(R.id.result_text)
             if (FunResult.saved_value == null && FunResult.number2 == null)
                 FunResult.saved_value = FunResult.number1
-            if ((FunResult.number1 == 0.0 || FunResult.number2 == 0.0) && FunAction.btn_name == "btn_division")
+            if ((FunResult.number1 == 0.0 || FunResult.number2 == 0.0) && FunAction.btn_name == Buttons.Division)
                 result_text.text = "0"
             else {
-                if (FunResult.number2 != null) {
-                    when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name
+                val number2 = FunResult.number2
+                if (number2 != null) {
+                    FunResult.answer = when (if (FunAction.btn_name != Buttons.Equility) FunAction.btn_name
                     else FunAction.prev_btn_name) {
-                        "btn_plus" -> {
-                            FunResult.answer = FunResult.number1?.plus(FunResult.number2!!)!!
+                        Buttons.Plus -> {
+                             FunResult.number1?.plus(number2)!!
                         }
 
-                        "btn_minus" -> {
-                            FunResult.answer = FunResult.number1?.minus(FunResult.number2!!)!!
+                        Buttons.Minus -> {
+                             FunResult.number1?.minus(FunResult.number2!!)!!
                         }
 
-                        "btn_division" -> {
-                            FunResult.answer = FunResult.number1?.div(FunResult.number2!!)!!
+                        Buttons.Division -> {
+                            FunResult.number1?.div(FunResult.number2!!)!!
                         }
 
-                        "btn_multiply" -> {
-                            FunResult.answer = FunResult.number1?.times(FunResult.number2!!)!!
+                        Buttons.Multiply -> {
+                             FunResult.number1?.times(FunResult.number2!!)!!
                         }
+
+                        Buttons.Equility -> 0.0
                     }
                 } else {
                     when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
