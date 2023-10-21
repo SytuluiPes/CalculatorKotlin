@@ -3,14 +3,10 @@ package com.example.calculatorisworking
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.util.Log.*
 import android.widget.Button
 import android.widget.TextView
-import kotlin.math.roundToInt
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import com.google.android.material.button.MaterialButton
-import java.lang.Exception
 import kotlin.math.roundToLong
 
 
@@ -22,11 +18,10 @@ object FunResult {
 }
 
 enum class Buttons{
-    Plus, Minus, Division, Multiply, Equility,
+    Plus, Minus, Division, Multiply, Equility
 }
 
 object FunAction {
-    var actionflag: Boolean = false
     var btn_name: Buttons = Buttons.Equility
     var prev_btn_name : Buttons = btn_name
     var input_text : Boolean = false
@@ -67,31 +62,31 @@ class MainActivity() : AppCompatActivity() {
         val btn_point : Button = findViewById(R.id.btn_point)
         btn_point.setOnClickListener { setPoint() }
         val btn_plus : Button = findViewById(R.id.btn_plus)
-        btn_plus.setOnClickListener { action("btn_plus") }
+        btn_plus.setOnClickListener { action(Buttons.Plus) }
         val btn_minus : Button = findViewById(R.id.btn_minus)
-        btn_minus.setOnClickListener { action("btn_minus") }
+        btn_minus.setOnClickListener { action(Buttons.Minus) }
         val btn_division : Button = findViewById(R.id.btn_division)
-        btn_division.setOnClickListener { action("btn_division") }
+        btn_division.setOnClickListener { action(Buttons.Division) }
         val btn_multiply : Button = findViewById(R.id.btn_multiply)
-        btn_multiply.setOnClickListener { action("btn_multiply") }
+        btn_multiply.setOnClickListener { action(Buttons.Multiply) }
         delText()
     }
     fun setText(str: String) {
         test("setText - START")
         val result_text: TextView = findViewById(R.id.result_text)
         if (result_text.text.toString() == "0" && str == "0") return Unit
-        if (!FunAction.input_text && !FunAction.actionflag) {
+        if (!FunAction.input_text && FunAction.btn_name == Buttons.Equility) {
             result_text.text = str
             FunAction.input_text = true
             FunResult.number1 = result_text.text.toString().toDouble()
             result_text.textSize = 80F
         }
-        else if (FunAction.input_text && !FunAction.actionflag) {
+        else if (FunAction.input_text && FunAction.btn_name == Buttons.Equility) {
             result_text.append(str)
             FunResult.number1 = result_text.text.toString().toDouble()
             result_text.textSize = 80F
         }
-        else if (!FunAction.input_text && FunAction.actionflag) {
+        else if (!FunAction.input_text && FunAction.btn_name != Buttons.Equility) {
             result_text.text = str
             FunAction.input_text = true
             FunResult.number2 = result_text.text.toString().toDouble()
@@ -118,7 +113,7 @@ class MainActivity() : AppCompatActivity() {
             result_text.text = result_division_hundred.toLong().toString()
         else
             result_text.text = result_division_hundred.toString()
-        if (!FunAction.actionflag)
+        if (FunAction.btn_name == Buttons.Equility)
             FunResult.number1 = result_text.text.toString().toDouble()
         else if (FunResult.number2 == null)
             FunResult.number1 = result_text.text.toString().toDouble()
@@ -131,9 +126,7 @@ class MainActivity() : AppCompatActivity() {
         test("setChar - START")
         val result_text: TextView = findViewById(R.id.result_text)
         var result_text_setChar = ""
-        var textsize = 0f
         if (result_text.text.toString().indexOf("-") == -1){
-            result_text.textSize = textsize
             result_text_setChar = "-${result_text.text}"
             result_text.text = result_text_setChar
         }
@@ -142,7 +135,7 @@ class MainActivity() : AppCompatActivity() {
             result_text.text = result_text_setChar
         }
         resizeText()
-        if (!FunAction.actionflag)
+        if (FunAction.btn_name == Buttons.Equility)
             FunResult.number1 = result_text.text.toString().toDouble()
         else if (FunResult.number2 == null)
             FunResult.number1 = result_text.text.toString().toDouble()
@@ -160,12 +153,13 @@ class MainActivity() : AppCompatActivity() {
             result_text.text = result_text_setPoint
         }
         FunAction.input_text = true
-        if (!FunAction.actionflag)
+        if (FunAction.btn_name == Buttons.Equility)
             FunResult.number1 = result_text.text.toString().toDouble()
         else if (FunResult.number2 == null)
             FunResult.number1 = result_text.text.toString().toDouble()
         else
             FunResult.number2 = result_text.text.toString().toDouble()
+        resizeText()
         test("setPoint - END")
     }
     fun resultView() {
@@ -202,22 +196,24 @@ class MainActivity() : AppCompatActivity() {
                         Buttons.Equility -> 0.0
                     }
                 } else {
-                    when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
-                        "btn_plus" -> {
-                            FunResult.answer = FunResult.number1?.plus(FunResult.saved_value!!)!!
+                    FunResult.answer = when (if (FunAction.btn_name != Buttons.Equility) FunAction.btn_name
+                    else FunAction.prev_btn_name) {
+                        Buttons.Plus -> {
+                            FunResult.number1?.plus(FunResult.saved_value!!)!!
                         }
 
-                        "btn_minus" -> {
-                            FunResult.answer = FunResult.number1?.minus(FunResult.saved_value!!)!!
+                        Buttons.Minus -> {
+                            FunResult.number1?.minus(FunResult.saved_value!!)!!
                         }
 
-                        "btn_division" -> {
-                            FunResult.answer = FunResult.number1?.div(FunResult.saved_value!!)!!
+                        Buttons.Division -> {
+                            FunResult.number1?.div(FunResult.saved_value!!)!!
                         }
 
-                        "btn_multiply" -> {
-                            FunResult.answer = FunResult.number1?.times(FunResult.saved_value!!)!!
+                        Buttons.Multiply -> {
+                            FunResult.number1?.times(FunResult.saved_value!!)!!
                         }
+                        Buttons.Equility -> 0.0
                     }
                 }
                 if (FunResult.answer.toLong().toDouble() == FunResult.answer) {
@@ -232,32 +228,32 @@ class MainActivity() : AppCompatActivity() {
                     result_text.text = FunResult.answer.toString()
                 }
             }
-            when (if (FunAction.btn_name != "btn_quality") FunAction.btn_name else FunAction.prev_btn_name) {
-                "btn_plus" -> {
-                    btn = findViewById(R.id.btn_plus)
+            btn = when (if (FunAction.btn_name != Buttons.Equility) FunAction.btn_name else FunAction.prev_btn_name) {
+                Buttons.Plus -> {
+                    findViewById(R.id.btn_plus)
                 }
 
-                "btn_minus" -> {
-                    btn = findViewById(R.id.btn_minus)
+                Buttons.Minus -> {
+                    findViewById(R.id.btn_minus)
                 }
 
-                "btn_division" -> {
-                    btn = findViewById(R.id.btn_division)
+                Buttons.Division -> {
+                    findViewById(R.id.btn_division)
                 }
 
-                "btn_multiply" -> {
-                    btn = findViewById(R.id.btn_multiply)
+                Buttons.Multiply -> {
+                    findViewById(R.id.btn_multiply)
                 }
+                else -> findViewById(R.id.btn_equlity)
             }
             btn.setBackgroundColor(Color.parseColor("#ffaf25"))
             btn.setTextColor(Color.parseColor("#ffffff"))
-            FunAction.actionflag = false
             FunAction.input_text = false
             if (FunResult.number2 != null) FunResult.saved_value = FunResult.number2
             FunResult.number2 = null
             FunResult.number1 = FunResult.answer
-            if (FunAction.btn_name != "btn_quality") FunAction.prev_btn_name = FunAction.btn_name
-            FunAction.btn_name = "btn_quality"
+            if (FunAction.btn_name != Buttons.Equility) FunAction.prev_btn_name = FunAction.btn_name
+            FunAction.btn_name = Buttons.Equility
         }
         resizeText()
         test("resultView - END")
@@ -275,60 +271,61 @@ class MainActivity() : AppCompatActivity() {
             btn_C.text = "AC"
             result_text.textSize = 80F
         }
-        else if (FunAction.actionflag == true){
-            when (FunAction.btn_name){
-                "btn_plus" -> {
-                    btn = findViewById(R.id.btn_plus)
+        else if (FunAction.btn_name != Buttons.Equility){
+            btn = when (FunAction.btn_name){
+                Buttons.Plus -> {
+                    findViewById(R.id.btn_plus)
                 }
-                "btn_minus" -> {
-                    btn = findViewById(R.id.btn_minus)
+                Buttons.Minus -> {
+                    findViewById(R.id.btn_minus)
                 }
-                "btn_division" -> {
-                    btn = findViewById(R.id.btn_division)
+                Buttons.Division -> {
+                    findViewById(R.id.btn_division)
                 }
-                "btn_multiply" -> {
-                    btn = findViewById(R.id.btn_multiply)
+                Buttons.Multiply -> {
+                    findViewById(R.id.btn_multiply)
                 }
+                else -> findViewById(R.id.btn_equlity)
             }
             btn.setBackgroundColor(Color.parseColor("#ffaf25"))
             btn.setTextColor(Color.parseColor("#ffffff"))
-            FunAction.btn_name = "btn_equlity"
-            FunAction.actionflag = false
+            FunAction.btn_name = Buttons.Equility
             FunResult.number1 = null
             FunResult.number2 = null
             FunResult.answer = 0.0
-            FunAction.prev_btn_name = ""
+            FunAction.prev_btn_name = Buttons.Equility
             FunResult.saved_value = null
         }
         test("delText - END")
     }
-    fun action(btn_name : String) {
+    fun action(btn_name: Buttons) {
         test("action - START")
         var btn : Button = findViewById(R.id.btn_equlity)
         if (FunAction.btn_name != btn_name){
-            when(FunAction.btn_name){
-                "btn_plus" -> {btn = findViewById(R.id.btn_plus)}
-                "btn_minus" -> {btn = findViewById(R.id.btn_minus)}
-                "btn_division" -> {btn = findViewById(R.id.btn_division)}
-                "btn_multiply" -> {btn = findViewById(R.id.btn_multiply)}
+            btn = when(FunAction.btn_name){
+                Buttons.Plus -> {findViewById(R.id.btn_plus)}
+                Buttons.Minus -> {findViewById(R.id.btn_minus)}
+                Buttons.Division -> {findViewById(R.id.btn_division)}
+                Buttons.Multiply -> {findViewById(R.id.btn_multiply)}
+                else -> findViewById(R.id.btn_equlity)
             }
             btn.setBackgroundColor(Color.parseColor("#ffaf25"))
             btn.setTextColor(Color.parseColor("#ffffff"))
-            when(btn_name) {
-                "btn_plus" -> {btn = findViewById(R.id.btn_plus)}
-                "btn_minus" -> {btn = findViewById(R.id.btn_minus)}
-                "btn_division" -> {btn = findViewById(R.id.btn_division)}
-                "btn_multiply" -> {btn = findViewById(R.id.btn_multiply)}
+            btn = when(FunAction.btn_name){
+                Buttons.Plus -> {findViewById(R.id.btn_plus)}
+                Buttons.Minus -> {findViewById(R.id.btn_minus)}
+                Buttons.Division -> {findViewById(R.id.btn_division)}
+                Buttons.Multiply -> {findViewById(R.id.btn_multiply)}
+                else -> findViewById(R.id.btn_equlity)
             }
             btn.setBackgroundColor(Color.parseColor("#ffffff"))
             btn.setTextColor(Color.parseColor("#ffaf25"))
             FunAction.btn_name = btn_name
             FunAction.input_text = false
-            FunAction.actionflag = true
         }
         test("action - END")
     }
-    private fun resizeText(){
+    private fun resizeText(TextSize : Float? = null){
         val result_text : TextView = findViewById(R.id.result_text)
         var textsize = result_text.textSize
         val paint = result_text.paint
@@ -353,6 +350,8 @@ class MainActivity() : AppCompatActivity() {
             |FunResult.answer = ${FunResult.answer}
             |FunResult.saved_value = ${FunResult.saved_value}
             |result_text.text = ${result_text.text}
+            |FunAction.btn_name = ${FunAction.btn_name}
+            |FunAction.btn_name = ${FunAction.prev_btn_name}
         """.trimMargin())
     }
 }
