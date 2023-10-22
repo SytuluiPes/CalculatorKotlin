@@ -20,18 +20,15 @@ object FunResult {
     var answer: Double = 0.0
     var saved_value: Double? = null
 }
-
 enum class Buttons {
     Plus, Minus, Division, Multiply, Equility
 }
-
 object FunAction {
     var btn_name: Buttons = Buttons.Equility
     var prev_btn_name: Buttons = btn_name
     var isAdd: Boolean = false
-    var del_level: Int = 1
+    var del_level: Int = 2
 }
-
 class MainActivity() : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +76,6 @@ class MainActivity() : AppCompatActivity() {
         btn_multiply.setOnClickListener { action(Buttons.Multiply) }
         delText()
     }
-
     fun setText(str: String) {
         test("setText - START")
         val result_text: TextView = binding.resultText
@@ -160,25 +156,20 @@ class MainActivity() : AppCompatActivity() {
             Buttons.Plus -> {
                 binding.btnPlus
             }
-
             Buttons.Minus -> {
                 binding.btnMinus
             }
-
             Buttons.Division -> {
                 binding.btnDivision
             }
-
             Buttons.Multiply -> {
                 binding.btnMultiply
             }
-
             Buttons.Equility -> {
                 binding.btnEqulity
             }
         }
     }
-
     fun setPercent() {
         test("setPercent - START")
         val result_text: TextView = binding.resultText
@@ -197,7 +188,6 @@ class MainActivity() : AppCompatActivity() {
             FunResult.number2 = result_text.text.toString().toDouble()
         test("setPercent - END")
     }
-
     fun setChar() {
         test("setChar - START")
         val result_text: TextView = binding.resultText
@@ -218,7 +208,6 @@ class MainActivity() : AppCompatActivity() {
             FunResult.number2 = result_text.text.toString().toDouble()
         test("setChar - END")
     }
-
     fun setPoint() {
         test("setPoint - START")
         val result_text: TextView = binding.resultText
@@ -237,7 +226,6 @@ class MainActivity() : AppCompatActivity() {
         resizeText()
         test("setPoint - END")
     }
-
     fun resultView() {
         test("resultView - START")
         if (FunResult.number1 != null && (FunAction.btn_name != Buttons.Equility ||
@@ -258,19 +246,15 @@ class MainActivity() : AppCompatActivity() {
                             Buttons.Plus -> {
                                 FunResult.number1?.plus(number2)!!
                             }
-
                             Buttons.Minus -> {
                                 FunResult.number1?.minus(FunResult.number2!!)!!
                             }
-
                             Buttons.Division -> {
                                 FunResult.number1?.div(FunResult.number2!!)!!
                             }
-
                             Buttons.Multiply -> {
                                 FunResult.number1?.times(FunResult.number2!!)!!
                             }
-
                             Buttons.Equility -> 0.0
                         }
                 } else {
@@ -280,19 +264,15 @@ class MainActivity() : AppCompatActivity() {
                             Buttons.Plus -> {
                                 FunResult.number1?.plus(FunResult.saved_value!!)!!
                             }
-
                             Buttons.Minus -> {
                                 FunResult.number1?.minus(FunResult.saved_value!!)!!
                             }
-
                             Buttons.Division -> {
                                 FunResult.number1?.div(FunResult.saved_value!!)!!
                             }
-
                             Buttons.Multiply -> {
                                 FunResult.number1?.times(FunResult.saved_value!!)!!
                             }
-
                             Buttons.Equility -> 0.0
                         }
                 }
@@ -318,6 +298,8 @@ class MainActivity() : AppCompatActivity() {
             if (FunAction.btn_name != Buttons.Equility) FunAction.prev_btn_name = FunAction.btn_name
             FunAction.btn_name = Buttons.Equility
         }
+        val btn_C = binding.btnC
+        btn_C.text = "AC"
         resizeText()
         test("resultView - END")
     }
@@ -358,6 +340,8 @@ class MainActivity() : AppCompatActivity() {
             }
             setActionButtonState(btn, false)
             result_text.text = "0"
+            FunAction.isAdd = false
+            btn_C.text = "AC"
             FunAction.btn_name = Buttons.Equility
             FunResult.number1 = null
             FunResult.number2 = null
@@ -391,7 +375,6 @@ class MainActivity() : AppCompatActivity() {
 
                 else -> binding.btnEqulity
             }
-            //old button work
             setActionButtonState(btn, false)
 
             btn = when (btn_name) {
@@ -419,7 +402,6 @@ class MainActivity() : AppCompatActivity() {
         }
         test("action - END")
     }
-
     private fun resizeText() {
         val result_text: TextView = findViewById(R.id.result_text)
         var textsize = result_text.textSize
@@ -453,7 +435,6 @@ class MainActivity() : AppCompatActivity() {
             }
         }
     }
-
     private fun test(text: String = "None") {
         val result_text: TextView = binding.resultText
         i(
@@ -469,6 +450,3 @@ class MainActivity() : AppCompatActivity() {
         )
     }
 }
-// Проблема в работе с LONG переменными
-// Проблема деление на 0, с использование строки "Ошибка"
-// Проблема с изменение размера окна вывода ответа
