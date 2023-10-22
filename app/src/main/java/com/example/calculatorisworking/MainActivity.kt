@@ -389,25 +389,37 @@ class MainActivity() : AppCompatActivity() {
         test("action - END")
     }
 
-    private fun resizeText(TextSize: Float? = null) {
-        val result_text: TextView = binding.resultText
-        val targetText = binding.resultText.text.toString()
+    private fun resizeText() {
+        val result_text: TextView = findViewById(R.id.result_text)
+        var textsize = result_text.textSize
         val paint = result_text.paint
-        paint.textSize = result_text.textSize
-
-        val fieldWidth = result_text.width.toFloat()
-        var textSizeInPx = paint.measureText(targetText)
-        if (result_text.text.toString().length == 1){
+        val textViewWidth = result_text.width
+        var textWidth = paint.measureText(result_text.text.toString())
+        i(
+            "", """
+            |textsize = $textsize
+            |textWidth = $textWidth
+            |textViewWidth = $textViewWidth
+        """.trimMargin()
+        )
+        if (result_text.text.toString().length == 1) {
             result_text.textSize = 80F
-        }
-        else {
-            while ((textSizeInPx - fieldWidth) > 0.5f) {
-                paint.textSize -= 3f
-//            i("autosize", "aim = ${aimWidth}, textViewWidth = ${fieldWidth} ")
-                textSizeInPx = paint.measureText(targetText)
+        } else
+        if (textWidth >= textViewWidth) {
+            while (textWidth >= textViewWidth) {
+                i("autosize", "iteration1")
+                textsize -= 3
+                result_text.textSize = textsize
+                textWidth = paint.measureText(result_text.text.toString())
             }
-            i("autosize", "TEXT_SIZE = ${paint.textSize}")
-            result_text.setTextSize(TypedValue.COMPLEX_UNIT_PX, paint.textSize)
+        } else {
+            while (textWidth / textViewWidth < 0.95 && textsize <= 240f) {
+                textsize += 3
+                result_text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textsize)
+                textWidth = paint.measureText(result_text.text.toString())
+
+                i("autosize", "iteration2")
+            }
         }
     }
 
