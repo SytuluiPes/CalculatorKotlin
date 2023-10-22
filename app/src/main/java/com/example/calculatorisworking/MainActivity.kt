@@ -1,5 +1,6 @@
 package com.example.calculatorisworking
 
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -28,14 +29,14 @@ object FunAction {
     var btn_name: Buttons = Buttons.Equility
     var prev_btn_name: Buttons = btn_name
     var isAdd: Boolean = false
+    var del_level: Int = 1
 }
 
 class MainActivity() : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("CalcActivity", "I AM CREATED: $this")
-        //
+
         binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
         val btn_0: Button = binding.btn0
@@ -82,29 +83,58 @@ class MainActivity() : AppCompatActivity() {
     fun setText(str: String) {
         test("setText - START")
         val result_text: TextView = binding.resultText
-        if (result_text.text.toString() == "0" && str == "0") return Unit
-        when {
-            !FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
-                result_text.text = str
-                FunAction.isAdd = true
-                FunResult.number1 = result_text.text.toString().toDouble()
+        if (result_text.text.toString() == "0" && str == "0"){
+            when {
+                !FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
+                    result_text.text = str
+                    FunAction.isAdd = true
+                    FunResult.number1 = result_text.text.toString().toDouble()
+                }
+                FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
+                    if(result_text.text.toString() != "0")
+                        result_text.append(str)
+                    FunResult.number1 = result_text.text.toString().toDouble()
+                }
+                !FunAction.isAdd && FunAction.btn_name != Buttons.Equility -> {
+                    val currentButton = getActionButton(FunAction.btn_name)
+                    setActionButtonState(currentButton, false)
+                    result_text.text = str
+                    FunAction.isAdd = true
+                    FunResult.number2 = result_text.text.toString().toDouble()
+                    FunAction.del_level = 1
+                }
+                else -> {
+                    if(result_text.text.toString() != "0")
+                        result_text.append(str)
+                    FunResult.number2 = result_text.text.toString().toDouble()
+                    FunAction.del_level = 1
+                }
             }
-
-            FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
-                result_text.append(str)
-                FunResult.number1 = result_text.text.toString().toDouble()
-            }
-            !FunAction.isAdd && FunAction.btn_name != Buttons.Equility -> {
-                val currentButton = getActionButton(FunAction.btn_name)
-                setActionButtonState(currentButton, false)
-                result_text.text = str
-                FunAction.isAdd = true
-                FunResult.number2 = result_text.text.toString().toDouble()
-            }
-
-            else -> {
-                result_text.append(str)
-                FunResult.number2 = result_text.text.toString().toDouble()
+        }
+        else {
+            when {
+                !FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
+                    result_text.text = str
+                    FunAction.isAdd = true
+                    FunResult.number1 = result_text.text.toString().toDouble()
+                }
+                FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
+                    result_text.append(str)
+                    FunResult.number1 = result_text.text.toString().toDouble()
+                }
+                !FunAction.isAdd && FunAction.btn_name != Buttons.Equility -> {
+                    val currentButton = getActionButton(FunAction.btn_name)
+                    setActionButtonState(currentButton, false)
+                    result_text.text = str
+                    FunAction.isAdd = true
+                    FunResult.number2 = result_text.text.toString().toDouble()
+                    FunAction.del_level = 1
+                }
+                else -> {
+                    result_text.append(str)
+                    FunResult.number2 = result_text.text.toString().toDouble()
+                    FunAction.del_level = 1
+                }
             }
         }
         resizeText()
@@ -172,11 +202,11 @@ class MainActivity() : AppCompatActivity() {
         test("setChar - START")
         val result_text: TextView = binding.resultText
         var result_text_setChar = ""
-        if (result_text.text.toString().indexOf("-") == -1) {
+        if (result_text.text.toString().indexOf("-") != 0) {
             result_text_setChar = "-${result_text.text}"
             result_text.text = result_text_setChar
         } else {
-            result_text_setChar = result_text.text.toString().replace("-", "")
+            result_text_setChar = result_text.text.toString().replaceFirst("-", "")
             result_text.text = result_text_setChar
         }
         resizeText()
@@ -217,7 +247,7 @@ class MainActivity() : AppCompatActivity() {
             val result_text: TextView = binding.resultText
             if (FunResult.saved_value == null && FunResult.number2 == null)
                 FunResult.saved_value = FunResult.number1
-            if ((FunResult.number1 == 0.0 || FunResult.number2 == 0.0) && FunAction.btn_name == Buttons.Division)
+            if ((FunResult.number1 == 0.0 || FunResult.number2 == 0.0) && (FunAction.btn_name == Buttons.Division || FunAction.prev_btn_name == Buttons.Division))
                 result_text.text = "0"
             else {
                 val number2 = FunResult.number2
@@ -297,16 +327,16 @@ class MainActivity() : AppCompatActivity() {
         val result_text: TextView = binding.resultText
         val btn: Button
         val btn_C: Button = binding.btnC
-        if (result_text.text.toString() != "0") {
+        if (FunAction.del_level == 1) {
             result_text.text = "0"
-            FunResult.saved_value = null
             FunAction.isAdd = false
             btn_C.text = "AC"
             resizeText()
             val currentButton = getActionButton(FunAction.btn_name)
             if (FunAction.btn_name != Buttons.Equility)
                 setActionButtonState(currentButton, true)
-        } else if (FunAction.btn_name != Buttons.Equility) {
+            FunAction.del_level = 2
+        } else if (FunAction.del_level == 2) {
             btn = when (FunAction.btn_name) {
                 Buttons.Plus -> {
                     binding.btnPlus
@@ -327,6 +357,7 @@ class MainActivity() : AppCompatActivity() {
                 else -> binding.btnEqulity
             }
             setActionButtonState(btn, false)
+            result_text.text = "0"
             FunAction.btn_name = Buttons.Equility
             FunResult.number1 = null
             FunResult.number2 = null
@@ -433,7 +464,7 @@ class MainActivity() : AppCompatActivity() {
             |FunResult.saved_value = ${FunResult.saved_value}
             |result_text.text = ${result_text.text}
             |FunAction.btn_name = ${FunAction.btn_name}
-            |FunAction.btn_name = ${FunAction.prev_btn_name}
+            |FunAction.prev_btn_name = ${FunAction.prev_btn_name}
         """.trimMargin()
         )
     }
