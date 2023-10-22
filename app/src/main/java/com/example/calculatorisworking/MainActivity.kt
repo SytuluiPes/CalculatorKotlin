@@ -1,11 +1,10 @@
 package com.example.calculatorisworking
 
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.renderscript.ScriptGroup.Binding
 import android.util.Log
 import android.util.Log.*
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.TextView
@@ -89,15 +88,12 @@ class MainActivity() : AppCompatActivity() {
                 result_text.text = str
                 FunAction.isAdd = true
                 FunResult.number1 = result_text.text.toString().toDouble()
-                result_text.textSize = 80F
             }
 
             FunAction.isAdd && FunAction.btn_name == Buttons.Equility -> {
                 result_text.append(str)
                 FunResult.number1 = result_text.text.toString().toDouble()
-                result_text.textSize = 80F
             }
-
             !FunAction.isAdd && FunAction.btn_name != Buttons.Equility -> {
                 val currentButton = getActionButton(FunAction.btn_name)
                 setActionButtonState(currentButton, false)
@@ -306,7 +302,7 @@ class MainActivity() : AppCompatActivity() {
             FunResult.saved_value = null
             FunAction.isAdd = false
             btn_C.text = "AC"
-            result_text.textSize = 80F
+            resizeText()
             val currentButton = getActionButton(FunAction.btn_name)
             if (FunAction.btn_name != Buttons.Equility)
                 setActionButtonState(currentButton, true)
@@ -395,21 +391,23 @@ class MainActivity() : AppCompatActivity() {
 
     private fun resizeText(TextSize: Float? = null) {
         val result_text: TextView = binding.resultText
-        var textsize = result_text.textSize
+        val targetText = binding.resultText.text.toString()
         val paint = result_text.paint
-        val textViewWidth = result_text.width
-        var textWidth = paint.measureText(result_text.text.toString())
-        i(
-            "", """
-            |textsize = $textsize
-            |textWidth = $textWidth
-            |textViewWidth = $textViewWidth
-        """.trimMargin()
-        )
-        while (textWidth.toDouble() <= textViewWidth.toDouble()) {
-            textsize -= 3
-            result_text.textSize = textsize
-            textWidth = paint.measureText(result_text.text.toString())
+        paint.textSize = result_text.textSize
+
+        val fieldWidth = result_text.width.toFloat()
+        var textSizeInPx = paint.measureText(targetText)
+        if (result_text.text.toString().length == 1){
+            result_text.textSize = 80F
+        }
+        else {
+            while ((textSizeInPx - fieldWidth) > 0.5f) {
+                paint.textSize -= 3f
+//            i("autosize", "aim = ${aimWidth}, textViewWidth = ${fieldWidth} ")
+                textSizeInPx = paint.measureText(targetText)
+            }
+            i("autosize", "TEXT_SIZE = ${paint.textSize}")
+            result_text.setTextSize(TypedValue.COMPLEX_UNIT_PX, paint.textSize)
         }
     }
 
